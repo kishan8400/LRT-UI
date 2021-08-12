@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="~/Script/jquery-2.1.4.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css">
+<script src="~/assets/js/jquery.dataTables.min.js"></script>
+<link href="~/assets/css/colReorder.dataTables.css" rel="stylesheet" />
+<link href="~/assets/css/responsive.dataTables.css" rel="stylesheet" />
+<script src="~/assets/js/dataTables.colReorder.js"></script>
+<script src="~/assets/js/dataTables.responsive.js"></script>
+<link href="~/assets/css/rowReorder.dataTables.min.css" rel="stylesheet" />
+<script src="~/assets/js/dataTables.rowReorder.min.js"></script>
+@*<link href="~/css/demo.css" rel="stylesheet" />
+    <link href="~/css/style.css" rel="stylesheet" />*@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+<style>
+    li[data-dtr-index="7"] {
+        display: none;
+    }
+    li[data-dtr-index="2"] {
+        display: none;
+    }
+</style>
+@*------------------------------------get data-------------------------------------------*@
+<script>
+    var myVar;
+    $(document).ready(function () {
+        Getdata();
+
+    });
+</script>
+<script>
+    $(document).on("click", "a.edit", function () {
+        //var $row = $(this).closest("tr");    // Find the row
+        //var $id = $row.find('td:eq(7)').text();
+        var currentRow = $(this).closest("tr");
+        var col1 = currentRow.find("td:eq(0)").text().split('Action');
+        if (col1[1] == undefined) {
+            col1[1] = currentRow.find("td:eq(7)").text();
+        }
+        //alert(col1[1])
+        sessionStorage.setItem("center-id", col1[1]);
+        window.location.replace("/Home/Center/" + col1[1]);
+    });
+</script>
+<script>
+    function Getdata() {
+        /*  $("#divtbl").append(' ')*/
+        $("#EmpInfo > tbody").html("");
+        $.getJSON("/Home/CenterDetails",
+            function (json) {
+                var tr;
+                for (var i = 0; i < json.length; i++) {
+                    //alert(json[i].Center_Id);
+                    tr = $('<tr/>');
+                    tr.append("<td class='w43_i td_padding'>" + (i + 1) + "</td>");
+                    tr.append("<td class='td_padding'><span>Center Name:</span><span class='label_text'>" + json[i].Center_Name + "</span></br><span>Owner:</span><span class='label_text'>" + json[i].Owner_Name + "</span></br><span>Email:</span><span class='label_text'>" + json[i].Email + "</span></br><span>Id Proof:</span><span class='label_text'>" + json[i].Id_Proof_Type + "</span></br><span>Center Id:</span><span class='label_text'>" + json[i].Center_User_Id + "</span></td>");
+
+                    tr.append("<td class='td_padding hide_me'><span>Mobile No:</span><span class='label_text'>" + json[i].Mobile_No + "</span></br><span>User Id:</span><span class='label_text'>" + json[i].Center_User_Id + "</span></br><span>Password:</span><span class='label_text'>" + json[i].Center_Password + "</span></br><span>Otp No:</span><span class='label_text'>" + json[i].OTP_No + "</td>");
+                    tr.append("<td class='td_padding'>" + json[i].Commission_Per + "</td>");
+                    tr.append("<td class='td_padding'><span>Address:</span><span class='label_text'>" + json[i].Address + "</span></br><span>Pin:</span><span class='label_text'>" + json[i].Pin_No + "</span></br><span>District:</span><span class='label_text'>" + json[i].District_Name + "</span></br><span>State:</span><span class='label_text'>" + json[i].State_Name + "</td>");
+                    tr.append("<td class='td_padding'><img class='c_img_size' src=" + json[i].Id_Proof_Url + "></td>");
+                    /*tr.append("<td></td>");*/
+                    var status = json[i].Active_Status;
+                    var status1 = "";
+                    if (status == "True") {
+                        status1 = "<i class='menu-icon fa fa-check bigger-120 green'  data-toggle='tooltip' title='Active'></i>Active";
+                    }
+                    else {
+                        status1 = "<i class='menu-icon fa fa-clock-o bigger-120 green' data-toggle='tooltip' title='Inactive'></i>Inactive";
+                    }
+
+                    tr.append("<td class='w80_i td_padding'><ul class='list_main'><li><a href='javascript:void(0);' class='view stats-icon-li red' data-rel='tooltip' title='View'><i class='menu-icon fa fa-eye red'></i>View</a></li><li><a href='javascript:void(0);'  id='myAnc' class='edit stats-icon-li blue' data-rel='tooltip' title='Edit'><i class='fa fa-edit'></i>Edit</a></li><br/><li><a href='javascript:void(0);' class='activate stats-icon-li green' data-rel='tooltip' >" + status1 + "</a></li><br/><li><a  href=" + json[i].Id_Proof_Url + " download class='download stats-icon-li purple' data-rel='tooltip' title='Download'><i class='menu-icon fa fa-download bigger-120 red'></i>Download</a></li></ul></td >");
+                    tr.append("<td class='hide_me'>" + json[i].Center_Id + "</td>");
+
+                    $('table').append(tr);
+
+                }
+                $('#EmpInfo').DataTable({
+
+                    responsive: true,
+                    colReorder: true
+                });
+
+            });
+
+    }
+</script>
+@*------------------------------------delete-------------------------------------------*@
+<script>
+    $(document).on("click", "a.delete", function (e) {
+
+        e.preventDefault();
+        //var $row = $(this).closest("tr");    // Find the row
+        //var $id = $row.find('td:eq(7)').text();
+        var currentRow = $(this).closest("tr");
+        var col1 = currentRow.find("td:eq(0)").text().split('Action');
+        if (col1[1] == undefined) {
+            col1[1] = currentRow.find("td:eq(7)").text();
+        }
+        swal({
+            title: 'Are you sure?',
+            text: '*You want to delete this data?*',
+            icon: 'warning',
+            buttons: ["Cancel", "Yes!"],
+        }).then(function (value) {
+            if (value) {
+                var objCenter = {};
+                objCenter.Center_Id = col1[1];
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/DeleteCenter",
+                    data: '{objCenter: ' + JSON.stringify(objCenter) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        $(".dataTables_length").remove();
+                        $(".dataTables_filter").remove();
+                        $(".dataTables_info").remove();
+                        $(".dataTables_paginate").remove();
+                        /* $(".dataTables_wrapper").remove();*/
+                        swal(response);
+                        Getdata();
+
+                        var script = document.createElement("script");
+                        script.type = "text/javascript";
+                        script.src = "/assets/js/jquery.dataTables.min.js";
+                        document.getElementsByTagName("body")[0].appendChild(script);
+
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            }
+            else {
+                swal("*Your data is safe*");
+            }
+        });
+
+    });
+</script>
+@*------------------------------------Activation-------------------------------------------*@
+<script>
+    $(document).on("click", "a.activate", function (e) {
+        e.preventDefault();
+        //var $row = $(this).closest("tr");
+        //var $id = $row.find('td:eq(7)').text();
+        var currentRow = $(this).closest("tr");
+        var col1 = currentRow.find("td:eq(0)").text().split('Action');
+        if (col1[1] == undefined) {
+            col1[1] = currentRow.find("td:eq(7)").text();
+        }
+        var objCenter = {};
+        objCenter.Center_Id = col1[1];
+        $.ajax({
+            type: "POST",
+            url: "/Home/CenterActivationStatus",
+            data: '{objCenter: ' + JSON.stringify(objCenter) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                $(".dataTables_length").remove();
+                $(".dataTables_filter").remove();
+                $(".dataTables_info").remove();
+                $(".dataTables_paginate").remove();
+                // $(".dataTables_wrapper").remove();
+                swal(response);
+                Getdata();
+
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.src = "/assets/js/jquery.dataTables.min.js";
+                document.getElementsByTagName("body")[0].appendChild(script);
+
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    });
+</script>
+@*------------------------------------View-------------------------------------------*@
+<script>
+    $(document).on("click", "a.view", function (e) {
+        var currentRow = $(this).closest("tr");
+        var col1 = currentRow.find("td:eq(0)").text().split('Action');
+        if (col1[1] == undefined) {
+            col1[1] = currentRow.find("td:eq(7)").text();
+        }
+        //var $row = $(this).closest("tr");    // Find the row
+        //var $id = $row.find('td:eq(7)').text();
+
+        GetDataForview(col1[1]);
+        $('#divlarge').modal('show');
+    });
+
+</script>
+<script>
+    $(document).on("click", "a.show", function (e) {
+
+        $('#myModal').modal('show');
+    });
+
+</script>
+<script>
+    function GetDataForview(centerid) {
+
+        alert(centerid);
+        var objCenter = {};
+
+        objCenter.Center_Id = centerid;
+
+        $.ajax({
+            type: "POST",
+            url: "/Home/CenterDetailsForView",
+            data: '{objCenter: ' + JSON.stringify(objCenter) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                $("#lblcentername").text(response.Center_Name);
+                $("#lblownername").text(response.Owner_Name);
+                $("#lblcommission").text(response.Commission_Per);
+                $("#lblmobileno").text(response.Mobile_No);
+                $("#lblaltmobile").text(response.Alt_Mobile_No);
+                $("#lblidproof").text(response.Id_Proof_Type);
+                $("#lbladdress").text(response.Address);
+                $("#lblpincode").text(response.Pin_No);
+                $("#lblemail").text(response.Email);
+                $("#lblstate").text(response.State_Name);
+                $("#lbldistrict").text(response.District_Name);
+                //$("#lblimage").src(response.Id_Proof_Url);
+                $("#lbluserid").text(response.Center_User_Id);
+                $("#lblpassword").text(response.Center_Password);
+                $("#lblotp").text(response.OTP_No);
+                $("#idproofno").text(response.Id_Proof_No);
+                var output = document.getElementById('myImg');
+                output.src = response.Id_Proof_Url;
+                var output1 = document.getElementById('imgzoom');
+                output1.src = response.Id_Proof_Url;
+                $("#aattach1").attr("href", response.Id_Proof_Url)
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+
+
+
+    };
+</script>
+<div class="page-heading">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-right">
+            <li class="breadcrumb-item"><a href="#">Master</a></li>
+            @*<li class="breadcrumb-item"><a href="#">Library</a></li>*@
+            <li class="breadcrumb-item active" aria-current="page">Center List</li>
+        </ol>
+    </nav>
+    <div class="row">
+        <div class="col-md-3">
+            <h4>Center List</h4>
+            <div> <a href="/Home/Center">Back</a></div>
+        </div>
+    </div>
+   
+    <div class="row r_align"> <a href="/Home/Center">new Center</a></div>
+</div>
+<div class="page-content">
+    <div class="page-heading">
+        <section class="section">
+            <div class="col-md-12 col-12">
+                <div class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Current Record</h4>
+                        </div>
+
+                        <div class="card-body">
+                            <table id="EmpInfo" class="display responsive nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class='w43_i'>S. No</th>
+                                        <th>Center Detail</th>
+                                        <th class="hide_me">Log In</th>
+                                        <th>Commission(%)</th>
+                                        <th>Address</th>
+                                        <th>Document</th>
+                                        <th class='w80_i'>Action</th>
+                                        <th class="hide_me"></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade text-left" id="divlarge" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel17" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg"
+                 role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel17">Center Detail</h4>
+                        <button type="button" class="close" data-bs-dismiss="modal"
+                                aria-label="Close">
+                            <i data-feather="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="label_w">Center Name </label>: <label class="label_text" id="lblcentername"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Owner Name</label>: <label class="label_text" id="lblownername"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Mobile No.</label>: <label class="label_text" id="lblmobileno"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Alt Mobile No.</label>: <label class="label_text" id="lblaltmobile"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Email Id</label>: <label class="label_text" id="lblemail"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">State</label>: <label class="label_text" id="lblstate"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">District</label>: <label class="label_text" id="lbldistrict"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Address</label>:<label class="label_text" id="lbladdress"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Pin Code</label>: <label class="label_text" id="lblpincode">Pin Code</label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Id Proof Type</label>:  <label class="label_text" id="lblidproof"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Id Proof No.</label>: <label class="label_text" id="idproofno"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Commission(%)</label>:<label class="label_text" id="lblcommission"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">User Id</label>: <label class="label_text" id="lbluserid"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">Password</label>: <label class="label_text" id="lblpassword"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="label_w">OTP No</label>: <label class="label_text" id="lblotp"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <a href='javascript:void(0);' class="show"><img id="myImg" src="" class="img_size" /></a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light-secondary"
+                                data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Close</span>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div id="myModal" class="modal">
+                <span class="close">&times;</span>
+                <img class="modal-content" id="img01">
+                <div id="caption"></div>
+            </div>*@
+        <div class="modal fade text-left w-100" id="myModal" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel17" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl"
+                 role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel17">Id Proof</h4>
+                        @*<button type="button" class="close" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                <i data-feather="x"></i>
+                            </button>*@
+                    </div>
+                    <div class="modal-body">
+                        <img id="imgzoom" src="" class="img_model_responsive" />
+                    </div>
+                    <div class="modal-footer">
+                        <a id="aattach1" href="#" class="showview" download data-bs-toggle="tooltip" data-bs-placement="right" title="click for download it">Download</a>
+                        <button type="button" class="btn btn-light-secondary"
+                                data-bs-dismiss="modal">
+                            <i class="bx bx-x d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">Close</span>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+</html>
